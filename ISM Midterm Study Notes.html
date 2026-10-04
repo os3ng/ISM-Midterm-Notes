@@ -1,0 +1,876 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ISM StudyCraft</title>
+<style>
+:root{
+  --sky1:#8fd3ff;
+  --sky2:#d8f0ff;
+  --grass:#5ea53a;
+  --grass-dark:#3f7a22;
+  --dirt:#8b5a2b;
+  --dirt-dark:#5e3a1a;
+  --stone:#a9adb3;
+  --stone-dark:#7e848c;
+  --wood:#9e6b34;
+  --wood-dark:#74491f;
+  --panel:#f3efe2;
+  --ink:#1d1d1d;
+  --leaf:#4c8b2f;
+  --gold:#f4d35e;
+  --red:#b24c4c;
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  color:var(--ink);
+  font-family:"Courier New", monospace;
+  background:
+    linear-gradient(to bottom, var(--sky1), var(--sky2) 220px, var(--grass) 220px, var(--grass-dark) 250px, var(--dirt) 250px, var(--dirt-dark) 100%);
+  min-height:100vh;
+}
+
+/* Pixel-ish block look */
+.block{
+  border:4px solid #000;
+  box-shadow:8px 8px 0 rgba(0,0,0,.35);
+  border-radius:2px;
+}
+
+header{
+  position:sticky;
+  top:0;
+  z-index:10;
+  background:
+    linear-gradient(to bottom, #79c2f0, #5ea8db);
+  border-bottom:4px solid #000;
+  box-shadow:0 6px 0 rgba(0,0,0,.25);
+}
+.header-inner{
+  max-width:1180px;
+  margin:auto;
+  padding:16px 18px 14px;
+}
+.brand{
+  font-size:28px;
+  font-weight:900;
+  letter-spacing:1px;
+  text-transform:uppercase;
+}
+.sub{
+  font-size:13px;
+  opacity:.88;
+  margin-top:4px;
+}
+nav{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:14px;
+}
+.navbtn{
+  appearance:none;
+  border:3px solid #000;
+  background:linear-gradient(to bottom, #79c84e, #4f922e);
+  color:#fff;
+  padding:10px 14px;
+  font-weight:700;
+  cursor:pointer;
+  text-transform:uppercase;
+  box-shadow:4px 4px 0 rgba(0,0,0,.28);
+}
+.navbtn:hover{transform:translateY(1px)}
+.navbtn.active{
+  background:linear-gradient(to bottom, #f0c54d, #d69b1f);
+  color:#231700;
+}
+
+main{
+  max-width:1180px;
+  margin:auto;
+  padding:24px 16px 40px;
+}
+
+.section{display:none}
+.section.active{display:block}
+
+.hero{
+  background:
+    linear-gradient(to bottom, #f5f1e4, #e9e2d0);
+  padding:28px;
+}
+.hero-grid{
+  display:grid;
+  grid-template-columns:1.3fr .7fr;
+  gap:16px;
+  align-items:stretch;
+}
+.hero h1{
+  margin:0 0 10px;
+  font-size:42px;
+  line-height:1.05;
+  text-transform:uppercase;
+}
+.hero p{
+  font-size:16px;
+  line-height:1.6;
+  margin:0 0 10px;
+}
+.hero .chips{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:14px;
+}
+.chip{
+  background:#fff;
+  border:3px solid #000;
+  padding:8px 12px;
+  font-size:13px;
+  font-weight:700;
+  box-shadow:4px 4px 0 rgba(0,0,0,.2);
+}
+.mini-scene{
+  min-height:210px;
+  position:relative;
+  overflow:hidden;
+  background:
+    linear-gradient(to bottom, #7ecaf7, #cfefff 62%, #5ca63a 62%, #4d8b2f 72%, #8b5a2b 72%, #69411c 100%);
+}
+.sun{
+  position:absolute; right:18px; top:18px;
+  width:54px; height:54px;
+  background:#ffd765; border:4px solid #000;
+  box-shadow:4px 4px 0 rgba(0,0,0,.2);
+}
+.cloud{
+  position:absolute; background:#fff; border:4px solid #000; height:20px;
+}
+.c1{left:18px; top:24px; width:72px}
+.c2{left:56px; top:40px; width:108px}
+.tree-trunk{
+  position:absolute; bottom:38px; left:38px;
+  width:36px; height:86px; background:var(--wood);
+  border:4px solid #000;
+}
+.tree-top{
+  position:absolute; left:8px; bottom:104px;
+  width:98px; height:74px; background:var(--leaf);
+  border:4px solid #000;
+}
+.creeper{
+  position:absolute; right:28px; bottom:28px;
+  width:54px; height:92px; background:#5fae41; border:4px solid #000;
+}
+.creeper:before{
+  content:""; position:absolute; left:8px; top:14px; width:10px; height:10px; background:#000;
+  box-shadow:20px 0 0 #000, 8px 24px 0 #000, 18px 24px 0 #000, 8px 34px 0 #000, 18px 34px 0 #000, 0 44px 0 #000, 10px 44px 0 #000, 20px 44px 0 #000, 30px 44px 0 #000;
+}
+
+.card{
+  background:var(--panel);
+  padding:18px;
+  margin:0 0 16px;
+}
+.card h2, .card h3{
+  margin:0 0 10px;
+  text-transform:uppercase;
+}
+.card p{line-height:1.65; margin:0 0 10px}
+
+.feature-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:14px;
+  margin-top:16px;
+}
+.feature{
+  background:#fffaf0;
+  padding:16px;
+}
+
+.search{
+  width:100%;
+  padding:13px 14px;
+  border:4px solid #000;
+  background:#fff;
+  font-family:inherit;
+  font-size:15px;
+  margin:6px 0 16px;
+  box-shadow:6px 6px 0 rgba(0,0,0,.2);
+}
+
+.tabs{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin:0 0 16px;
+}
+.tab{
+  border:3px solid #000;
+  background:linear-gradient(to bottom, #bdbfc4, #90949d);
+  color:#111;
+  padding:10px 12px;
+  font-family:inherit;
+  font-weight:700;
+  cursor:pointer;
+  box-shadow:4px 4px 0 rgba(0,0,0,.2);
+}
+.tab.active{
+  background:linear-gradient(to bottom, #79c84e, #4f922e);
+  color:#fff;
+}
+
+.topic-card .content{
+  white-space:pre-line;
+  line-height:1.7;
+  background:#fffdf7;
+  border:3px solid #000;
+  padding:14px;
+}
+.extras{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-top:12px;
+}
+.extra{
+  background:#f9f3df;
+  border:3px solid #000;
+  padding:12px;
+}
+
+.summary-grid, .term-grid, .quiz-grid, .flash-grid{
+  display:grid;
+  gap:14px;
+}
+.summary-grid{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.term-grid{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.flash-grid{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.quiz-grid{grid-template-columns:1fr}
+
+.term, .summary, .quiz-item{
+  background:#fffaf0;
+  padding:16px;
+}
+
+.flash{
+  min-height:130px;
+  background:#fdf8eb;
+  padding:16px;
+  cursor:pointer;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+}
+.flash .answer{display:none; color:#145214; font-weight:700}
+.flash.flip .question{display:none}
+.flash.flip .answer{display:block}
+
+.opt{
+  display:block;
+  width:100%;
+  text-align:left;
+  margin:8px 0 0;
+  padding:10px 12px;
+  font-family:inherit;
+  border:3px solid #000;
+  background:#fff;
+  cursor:pointer;
+}
+.opt.good{background:#b6eca8}
+.opt.bad{background:#f6b1b1}
+
+.footer{
+  margin-top:26px;
+  text-align:center;
+  font-size:13px;
+  padding:14px;
+  opacity:.9;
+}
+
+@media (max-width:850px){
+  .hero-grid{grid-template-columns:1fr}
+  .hero h1{font-size:34px}
+  .extras{grid-template-columns:1fr}
+}
+
+.flash-main{
+  background:#fffaf0;
+  padding:22px;
+  min-height:330px;
+  display:grid;
+  grid-template-columns:1fr;
+  gap:14px;
+}
+.flash-main .term-title{
+  font-size:32px;
+  font-weight:900;
+  text-transform:uppercase;
+  text-align:center;
+  margin:8px 0;
+}
+.flash-main .category{
+  text-align:center;
+  font-size:13px;
+  font-weight:700;
+  color:#365b22;
+}
+.flash-main .front-hint{
+  text-align:center;
+  opacity:.8;
+  margin-top:8px;
+}
+.flash-answer-panel{
+  display:none;
+  background:#fffdf7;
+  border:3px solid #000;
+  padding:15px;
+  line-height:1.6;
+}
+.flash-main.revealed .flash-answer-panel{display:block}
+.flash-main.revealed .front-hint{display:none}
+.flash-actions{
+  display:flex;
+  gap:10px;
+  justify-content:center;
+  flex-wrap:wrap;
+}
+.know-btn{background:linear-gradient(to bottom,#7fd35b,#4b9a2e)!important}
+.review-btn{background:linear-gradient(to bottom,#e5a76c,#b96b33)!important}
+.flash-mini{
+  min-height:145px;
+  background:#fffaf0;
+  padding:14px;
+  cursor:pointer;
+  position:relative;
+}
+.flash-mini small{display:block;opacity:.7;margin-bottom:6px}
+.flash-mini .status{
+  position:absolute;
+  right:8px;
+  top:8px;
+  font-weight:900;
+}
+.status.known{color:#2e7d32}
+.status.review{color:#a64b20}
+
+</style>
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <div class="brand">ISM StudyCraft</div>
+    <div class="sub">Minecraft-theme revision hub for Information Security Management</div>
+    <nav>
+      <button class="navbtn active" data-s="home">Home</button>
+      <button class="navbtn" data-s="notes">Notes</button>
+      <button class="navbtn" data-s="summary">Summary</button>
+      <button class="navbtn" data-s="flash">Flashcards</button>
+      <button class="navbtn" data-s="mcq">MCQ Drill</button>
+      <button class="navbtn" data-s="mock">Midterm Mock</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section id="home" class="section active">
+    <div class="hero block">
+      <div class="hero-grid">
+        <div>
+          <h1>Welcome to StudyCraft</h1>
+          <p>Your ISM revision world, but in a more fun Minecraft-style vibe.</p>
+          <p>This site groups the lecture content by topic, then gives you clean notes, quick summaries, flashcards, and MCQ practice — so senang sikit nak revise.</p>
+          <div class="chips">
+            <div class="chip">Topic-based notes</div>
+            <div class="chip">Easy recall</div>
+            <div class="chip">Flashcards</div>
+            <div class="chip">MCQ practice</div>
+          </div>
+        </div>
+        <div class="mini-scene block">
+          <div class="sun"></div>
+          <div class="cloud c1"></div>
+          <div class="cloud c2"></div>
+          <div class="tree-trunk"></div>
+          <div class="tree-top"></div>
+          <div class="creeper"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="feature-grid">
+      <div class="feature block">
+        <h3>Notes</h3>
+        <p>All important lecture points combined by real topic, not broken slide by slide.</p>
+      </div>
+      <div class="feature block">
+        <h3>Summary</h3>
+        <p>Fast review for the high-yield concepts you should really remember.</p>
+      </div>
+      <div class="feature block">
+        <h3>Flashcards</h3>
+        <p>Good for checking if you can recall terms and core distinctions quickly.</p>
+      </div>
+      <div class="feature block">
+        <h3>MCQ Drill</h3>
+        <p>Practice the basics and strengthen the concepts most likely to come out.</p>
+      </div>
+    </div>
+
+    <div class="card block">
+      <h2>Best things to lock in first</h2>
+      <p><b>Law vs Ethics</b>, <b>Policy vs Standard vs Procedure vs Guideline</b>, <b>EISP vs ISSP vs SysSP</b>, <b>Awareness vs Behaviour</b>, <b>IRP vs DRP vs BCP</b>, <b>Due Care vs Due Diligence</b>, and <b>direct vs indirect BIA cost</b>.</p>
+    </div>
+  </section>
+
+  <section id="notes" class="section">
+    <div class="card block">
+      <h2>Complete Topic Notes</h2>
+      <input id="search" class="search" placeholder="Search topic or keyword...">
+      <div id="sectionTabs" class="tabs"></div>
+      <div id="notesbox"></div>
+    </div>
+  </section>
+
+  <section id="summary" class="section">
+    <div class="card block">
+      <h2>High-Yield Summary</h2>
+      <div id="summaryBox" class="summary-grid"></div>
+    </div>
+  </section>
+
+  
+  <section id="flash" class="section">
+    <div class="card block">
+      <h2>Reactive Flashcards</h2>
+      <p>Flip the card, then mark whether you <b>Know It</b> or need to <b>Review Again</b>. Use filters and shuffle to make revision less predictable.</p>
+
+      <div class="feature-grid" style="margin-bottom:14px;">
+        <div class="feature block"><h3 id="fcTotal">0</h3><p>Cards in current set</p></div>
+        <div class="feature block"><h3 id="fcKnown">0</h3><p>Known</p></div>
+        <div class="feature block"><h3 id="fcReview">0</h3><p>Review Again</p></div>
+        <div class="feature block"><h3 id="fcProgress">0%</h3><p>Progress</p></div>
+      </div>
+
+      <div class="tabs" id="flashFilters"></div>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;">
+        <button class="navbtn" id="shuffleFlashBtn">Shuffle</button>
+        <button class="navbtn" id="reviewOnlyBtn">Review Missed</button>
+        <button class="navbtn" id="resetFlashBtn">Reset Progress</button>
+      </div>
+
+      <div id="flashStage"></div>
+      <div id="flashDeck" class="flash-grid" style="margin-top:18px;"></div>
+    </div>
+  </section>
+
+
+  <section id="mcq" class="section">
+    <div class="card block">
+      <h2>MCQ Basic Drill</h2>
+      <div id="quizbox" class="quiz-grid"></div>
+    </div>
+  </section>
+
+
+  <section id="mock" class="section">
+    <div class="card block">
+      <h2>Midterm Mock Practice</h2>
+      <p>Practice using the same question styles highlighted by your lecturer: <b>MCQ, Scenario Questions, Pick-A-Term, and True/False.</b></p>
+
+      <div class="feature-grid">
+        <div class="feature block"><h3>Part A</h3><p>8 MCQ</p></div>
+        <div class="feature block"><h3>Part B</h3><p>6 Scenario</p></div>
+        <div class="feature block"><h3>Part C</h3><p>12 Pick-A-Term</p></div>
+        <div class="feature block"><h3>Part D</h3><p>10 True / False</p></div>
+      </div>
+
+      <button class="navbtn" id="startMockBtn" style="margin:14px 0;">Start / Restart Mock</button>
+      <div id="mockProgress" style="font-weight:700;margin:0 0 14px;">Progress: 0 / 36</div>
+      <div id="mockContainer"></div>
+      <button class="navbtn" id="submitMockBtn" style="margin-top:16px;">Submit Mock</button>
+      <div id="mockResult" class="card block" style="display:none;margin-top:18px;"></div>
+    </div>
+  </section>
+
+  <div class="footer">Built from your ISM lecture content • Minecraft-style edition</div>
+</main>
+
+<script>
+const SECTIONS = [{"title": "Section 1 – Laws and Ethics", "topics": [{"title": "Legal and Ethical Issues of Information Security", "content": "\nInformation security management protects organizational data and assets against threats, with confidentiality, integrity, and availability as key goals.\n\nLaws are rules that mandate or prohibit certain behaviour and carry the authority of a governing body. Ethics define socially acceptable behaviour but do not carry the same governing authority. Ethical standards are influenced by cultural morals, attitudes, and customs, although some ethical principles are widely accepted.\n\nA useful exam distinction:\n• Law = legally enforced.\n• Ethics = socially/morally expected.\n• A behaviour can be unethical even when it is not clearly illegal.\n", "memory": "LAW = Legal Authority With consequences. ETHICS = expected moral conduct.", "scenario": "An employee reads a colleague’s private files without permission. This may breach organizational ethics and policy, and depending on the act, may also violate law."}, {"title": "Policy vs Law", "content": "\nOrganizational policies describe acceptable and unacceptable employee behaviour and function like internal organizational rules. Policies may include penalties, sanctions, and disciplinary actions.\n\nThe major difference is that ignorance of law is not accepted as an excuse, while an organization must make reasonable efforts to ensure employees know and understand its policies.\n\nFor a policy to be enforceable, the organization should ensure:\n• Dissemination\n• Review\n• Comprehension\n• Compliance\n• Uniform enforcement\n", "memory": "A policy cannot be fairly enforced if employees were never properly informed.", "scenario": "If a company punishes one worker for violating a rule that was never communicated, the policy may be difficult to enforce fairly."}, {"title": "Cyber Law and Cybercrime", "content": "\nCyber law, or Information Technology law, governs the use of computers, digital networks, mobile devices, the internet, digital business, data privacy, and computer crime.\n\nCybercrime refers to illegal acts involving computers, computer systems, applications, or networks.\n\nExamples include:\n• Unauthorized access and penetration\n• Theft of proprietary information\n• Financial fraud\n• Data or network sabotage\n• Network disruption\n• Malware and virus distribution\n• Software and intellectual-property piracy\n• Identity theft\n• Terrorism-related cyber activity\n\nCybercrime is commonly classified as:\n• Computer-assisted crime – the computer helps commit the crime.\n• Computer-specific/targeted crime – the computer or system is the target.\n", "memory": "Tool or Target? If the computer helps the crime = assisted. If the computer is attacked = targeted.", "scenario": "Using a laptop to run an online scam is computer-assisted crime. Breaking into a university server is computer-targeted crime."}, {"title": "Types of Law", "content": "\nCivil law concerns relationships between individuals and organizations.\n\nCriminal law addresses offences considered harmful to society.\n\nPublic law regulates government agencies and their relationships with citizens, employees, and other governments. It includes areas such as criminal, administrative, and constitutional law.\n\nPrivate law regulates relationships among individuals and organizations, including areas such as family, commercial, and labour law.\n", "memory": "Civil = disputes/relationships. Criminal = offence against society.", "scenario": "A hacking offence may lead to criminal prosecution, while a related financial-loss claim may also create civil liability."}, {"title": "Malaysian and International Cyber Law", "content": "\nThe lecture lists Malaysian laws related to cyber and information-security matters, including:\n• Copyright (Amendment) Act 1997\n• Computer Crimes Act 1997\n• Digital Signature Act 1997\n• Telemedicine Act 1997\n• Communications and Multimedia Act 1998\n• Electronic Commerce Act 2006\n• Electronic Government Activities Act 2007\n• Personal Data Protection Act 2010\n• Penal Code\n• Anti-Fake News Act 2018\n\nInternational cybercrime investigations can involve multiple countries. Domestic law may not directly apply outside national jurisdiction, and international cooperation may be required to obtain evidence.\n\nA common problem is cross-border evidence. For example, an attacker may operate from one country, attack a victim in another country, and use a cloud server located in a third country.\n\nThe European Council Cyber-Crime Convention aims to improve international cooperation and investigation of technology-related crime.\n", "memory": "Cybercrime crosses borders faster than law does.", "scenario": "Investigators in Malaysia cannot simply seize a foreign cloud server. They may need international legal cooperation."}, {"title": "Nature, Characteristics and Motivation of Cybercrime", "content": "\nCybercrime can be:\n• Anonymous\n• Large in scale\n• High velocity\n• Cross-border\n• Technology-oriented\n• Capable of economic, social, religious, racial, or terrorism-related impact\n\nExamples of criminal activities include:\n• Online gambling\n• Credit-card or e-commerce fraud\n• Information theft\n• Hacking and illegal intrusion\n• Malware and botnets\n• Spamming\n• Online money laundering\n\nMotivations mentioned in the lecture include:\n• Fun\n• Testing skills\n• Speed and immediacy of the internet\n• Easy money\n", "memory": "Cybercrime = fast, borderless, scalable, and often anonymous.", "scenario": "A botnet operator can attack thousands of systems in multiple countries in a short time without being physically present."}, {"title": "Ethics in Information Security", "content": "\nInformation security professionals are expected to understand ethical responsibilities clearly because their work gives them access to sensitive systems, data, and powerful technical capabilities.\n\nThe Ten Commandments of Computer Ethics include principles such as:\n• Do not use computers to harm others.\n• Do not interfere with another person’s computer work.\n• Do not snoop through other people’s files.\n• Do not use computers to steal.\n• Do not bear false witness.\n• Do not use proprietary software without payment.\n• Do not use computer resources without authorization.\n• Do not take other people’s intellectual output.\n• Consider the social consequences of systems and programs.\n• Use computers with respect and consideration for others.\n\nEducation is an important factor in shaping ethical perceptions.\n", "memory": "Technical ability does not remove ethical responsibility.", "scenario": "A security tester may know how to exploit a system, but using that skill without authorization is unethical and potentially illegal."}, {"title": "Deterring Unethical and Illegal Behaviour", "content": "\nInformation security personnel should use policy, education and training, and technology as controls to discourage unethical and illegal activities.\n\nUnethical behaviour may result from:\n• Ignorance\n• Accident\n• Intent\n\nDeterrence is strongest when three conditions exist:\n• Fear of penalty\n• Probability of being caught\n• Probability that the penalty will actually be administered\n", "memory": "Deterrence = penalty + detection + enforcement.", "scenario": "A rule against unauthorized access will not deter much if employees believe nobody monitors access logs or applies penalties."}, {"title": "Due Care and Due Diligence", "content": "\nDue care means ensuring employees know what is acceptable or unacceptable and understand the consequences of illegal or unethical actions.\n\nDue diligence requires the organization to make a valid effort to protect others and to maintain that effort continuously.\n\nExam distinction:\n• Due care = establish the proper protection and expectations.\n• Due diligence = keep maintaining and checking that protection.\n", "memory": "Care = set it up properly. Diligence = keep it working properly.", "scenario": "Publishing a security policy is due care. Regularly reviewing and updating controls is due diligence."}, {"title": "Investigations, Sanctions and Code of Ethics", "content": "\nWhen an organization suspects a policy or law violation, an investigator such as the CISO, Information Security Manager, or another appointed person should document what happened and how.\n\nThe lecture lists sanctions such as:\n• Warning\n• Severe warning\n• Suspension\n• Ejection\n• Fine\n\nInformation security professionals should follow a professional code of ethics. The code should:\n• Guide behaviour and decisions\n• Provide a benchmark for self-evaluation\n• Reduce ethical problems\n• Help professionals resolve ethical dilemmas\n\nHaving a code alone is not enough. It must be understood, used, taught, monitored, regularly re-evaluated, and revised.\n", "memory": "A code of ethics only works if people actually understand and use it.", "scenario": "If a company has a code of ethics but never trains staff or enforces it, the document has little practical value."}]}, {"title": "Section 2 – Part 01: Information Security Policy, Frameworks and Models", "topics": [{"title": "Security Policy Basics", "content": "\nA policy is a statement that provides guidelines and instructions for decision-making.\n\nThe success of information-resource protection depends heavily on the policy that is created and on management’s attitude toward information security.\n\nObjectives of security policy include:\n• Reducing risk\n• Supporting compliance with laws and regulations\n• Protecting information integrity and confidentiality\n\nA policy should define expectations, authorize monitoring and investigation, identify consequences of violations, reduce risk, and support regulatory compliance.\n\nFor policies to be effective, they must be disseminated, read, understood, agreed to, uniformly enforced, and continuously maintained.\n", "memory": "Policy defines the rules of the game.", "scenario": "A company cannot rely only on firewalls; it also needs policies telling employees what they may and may not do."}, {"title": "Policy, Standard, Procedure and Guideline", "content": "\nPolicy:\nA high-level statement defining what is right or wrong, expected behaviour, appeal processes, and penalties.\n\nStandard:\nA detailed mandatory statement describing what must be done to comply with policy.\n\nProcedure:\nStep-by-step instructions describing how to perform a task in line with policy and standards.\n\nGuideline:\nA non-mandatory recommendation that employees may use as a reference.\n\nThe hierarchy is generally:\nPolicy → Standard → Procedure / Guideline\n", "memory": "Policy = WHAT. Standard = MUST. Procedure = HOW. Guideline = SHOULD.", "scenario": "“Visitors must always be escorted” is a standard. The exact registration and escort steps are the procedure."}, {"title": "Types of Information Security Policy", "content": "\nThe lecture presents three major information-security policy types:\n\n1. Enterprise Information Security Program Policy (EISP)\n• Executive-level\n• Organization-wide\n• Gives strategic direction\n• Defines general requirements\n• Assigns responsibilities\n• Addresses legal compliance\n\n2. Issue-Specific Security Policy (ISSP)\n• Focuses on one technology, resource, or issue\n• Often requires frequent updates\n• Examples: email use, internet use, BYOD, company equipment, telecommunications\n\n3. System-Specific Security Policy (SysSP)\n• Focuses on specific systems or technical configurations\n• May act as a standard or procedure\n• Examples: firewall configuration and access-control lists\n", "memory": "EISP = Enterprise. ISSP = Issue. SysSP = System.", "scenario": "A company-wide security policy is EISP; email-usage rules are ISSP; firewall ACL requirements are SysSP."}, {"title": "Effective Policy Development", "content": "\nEffective policies should be:\n• Developed using accepted practices\n• Formally approved by management\n• Properly distributed\n• Read by employees\n• Understood by employees\n• Agreed to by act or affirmation\n• Uniformly applied and enforced\n\nPolicy development is presented as a three-part project:\n1. Design and write the policy.\n2. Obtain senior-management approval.\n3. Establish management processes to distribute and administer the policy.\n\nPolicies should be written at a reasonable reading level with minimal unnecessary technical jargon.\n", "memory": "Write it, approve it, distribute it, understand it, enforce it.", "scenario": "A technically perfect policy that employees cannot understand will still fail."}, {"title": "Policy Compliance and Enforcement", "content": "\nEmployees should formally agree to policies either through action or affirmation.\n\nAgreement by act can happen when a user must acknowledge a policy before using a system or resource.\n\nEnforcement should be uniform and impartial. If employees can prove that policies are inconsistently enforced, the organization may face disciplinary or legal problems.\n", "memory": "Same rule, same enforcement.", "scenario": "Punishing one employee for a violation while ignoring the same violation by another employee weakens policy enforceability."}, {"title": "Frameworks, Models and Blueprints", "content": "\nSecurity models are standards or reference points used for comparison, adoption, or adaptation.\n\nA framework or security model provides an outline for a more detailed organization-specific security blueprint.\n\nA blueprint describes existing controls and identifies other controls that are needed.\n\nOrganizations may adapt several frameworks because one model may not perfectly fit every environment.\n\nBenchmarking can also be used by following industry practices or approaches used successfully by other organizations.\n", "memory": "Framework = skeleton. Blueprint = organization-specific detailed design.", "scenario": "A company may use ISO guidance as the foundation, then create its own detailed security blueprint."}, {"title": "Security Architecture Models", "content": "\nThe lecture lists several security architecture models:\n• Trusted Computing Base Model – authorization\n• Bell-LaPadula – confidentiality\n• Biba – integrity\n• Clark-Wilson – integrity/access control\n• Graham-Denning – access control\n• Harrison-Ruzzo-Ullman – access control\n• Brewer-Nash / Chinese Wall – conflict-of-interest prevention\n• Common Criteria\n\nThese models help organizations design and improve security implementation through hardware, software, policies, and practices.\n", "memory": "Bell-LaPadula = secrecy. Biba = integrity. Brewer-Nash = conflict prevention.", "scenario": "If a question emphasizes preventing disclosure of classified information, Bell-LaPadula is the strongest match."}, {"title": "Security Management Models", "content": "\nThe lecture lists major security-management models and frameworks such as:\n• ISO 27000 Series\n• NIST Security Models\n• COBIT\n• COSO\n• ITIL\n• Information Security Governance Framework (ISGF)\n\nThe ISO 27000 series is widely referenced in information-security management.\n\nISO/IEC 27002 provides guidance for initiating, implementing, maintaining, and improving information-security management.\n", "memory": "Architecture models explain security principles; management models guide organizational security management.", "scenario": "An organization wanting structured security-management guidance may refer to ISO 27000-series standards."}]}, {"title": "Section 2 – Part 02: SETA Programs", "topics": [{"title": "SETA Overview", "content": "\nSETA stands for Security Education, Training, and Awareness.\n\nThe purpose of SETA is to reduce accidental security breaches by members of the organization.\n\nMajor benefits include:\n• Improving employee behaviour\n• Teaching employees where to report policy violations\n• Allowing the organization to hold employees accountable\n\nSETA improves security by:\n• Building in-depth knowledge for those who design and operate security programs\n• Developing skills so users perform their jobs more securely\n• Improving awareness of the need to protect system resources\n", "memory": "SETA = teach people to KNOW, DO, and REPORT securely.", "scenario": "Even with strong security tools, one careless user can still expose credentials through phishing."}, {"title": "Security Awareness", "content": "\nThe main goal of a security-awareness program is to educate users about their responsibility to protect confidentiality, integrity, and availability.\n\nUsers should understand both:\n• How to protect information\n• Why protecting it matters\n\nAwareness programs prepare users for later training by changing attitudes and reminding them about security procedures.\n\nThe lecture emphasizes:\nAwareness = “I know”\nBehaviour = “I do”\n\nAwareness alone is not enough if the user does not change behaviour.\n", "memory": "Knowing security is not the same as practicing security.", "scenario": "An employee may know phishing is dangerous but still enter credentials into a fake login page."}, {"title": "Why Users Are Vulnerable", "content": "\nUsers may be vulnerable because they:\n• Are unaware of risk and consequences\n• Know the risk but think security is too much work\n• Know the risk but find security too complex\n• Make mistakes\n\nAttackers exploit users by:\n• Impersonating authority\n• Creating panic or fear\n• Promising something desirable\n", "memory": "Attackers often attack human reactions instead of technical systems.", "scenario": "A fake message claiming to be from the CEO urgently asks an employee to transfer money."}, {"title": "Security Culture and Target Groups", "content": "\nImportant elements of a strong security culture include:\n• Responsibility\n• Trust\n• Communication\n• Cooperation\n\nOrganizations should define the target group for security-awareness activities and understand:\n• Current awareness level\n• Existing behaviour\n• How users use ICT\n• Their concerns\n• Their responsibilities\n\nTarget-group analysis includes:\n1. Identify the target group.\n2. Understand its situation.\n3. Assess awareness.\n4. Assess behaviour.\n", "memory": "Different users need different security messages.", "scenario": "Finance staff may need anti-fraud awareness, while system administrators need deeper technical security training."}, {"title": "Security Awareness and Behaviour Management Model", "content": "\nThe model follows four main stages:\n\n1. Plan\n• Form project team\n• Assign responsibilities\n• Build business case\n• Calculate cost-benefit or ROI\n• Obtain management support\n• Define target groups\n• Measure current awareness and behaviour\n\n2. Strategize\n• Design relevant awareness content\n• Decide coverage, format, visibility, frequency, and quality\n• Develop motivational and disciplinary strategies\n• Define measurement indicators\n\n3. Execute\n• Deliver the program efficiently\n• Collect feedback\n• Confirm receipt\n\n4. Measure and Adjust\n• Measure performance\n• Use security metrics\n• Modify strategies\n• Relaunch or improve the program\n", "memory": "Plan → Strategize → Execute → Measure & Adjust.", "scenario": "A company first measures phishing awareness, launches training, runs simulations, then adjusts the program based on results."}, {"title": "Measuring Awareness and Behaviour", "content": "\nAwareness can be measured using:\n• Interviews\n• Surveys\n• Quizzes\n• Mind-map sessions\n\nBehaviour can be measured using:\n• Observation\n• Data mining\n• Incident-report review\n• Simulated social engineering\n\nBehaviour is more difficult to measure because it is not always directly visible.\n", "memory": "Awareness = ask them. Behaviour = observe them.", "scenario": "A quiz shows what employees know; a simulated phishing test shows what they actually do."}, {"title": "Critical Success Factors and Obstacles", "content": "\nCritical success factors include:\n• Management support\n• Baseline measurement before training\n• Correct target audience\n• Strong communication\n• Training suited to organizational culture\n• Evidence that security behaviour improves\n\nCommon obstacles include:\n• Resistance to change\n• Belief that security is only an IT problem\n• One-size-fits-all training\n• Too much information\n• Lack of organization\n• Failure to follow up\n• Lack of management support\n• Lack of resources\n• Failure to explain why security matters\n", "memory": "Good awareness is relevant, supported, measurable, and repeated.", "scenario": "A generic annual video for every employee may fail because different departments face different risks."}, {"title": "Motivation, Discipline and Human Metrics", "content": "\nSecurity behaviour can be improved through both motivational and disciplinary approaches.\n\nExamples of motivational approaches:\n• Incentives for compliance\n• Encouraging users to report suspicious events\n\nThe lecture suggests reporting guidance such as:\n• Do not necessarily report every obvious phishing message.\n• Report if unsure.\n• Report if victimized.\n\nEscalating violations may involve:\n1. Additional training\n2. Manager notification\n3. Manager meeting\n4. HR involvement\n\nHuman metrics should be designed carefully because people react differently from machines and may need HR or legal approval.\n", "memory": "Reward good behaviour; correct repeated bad behaviour.", "scenario": "An employee who repeatedly fails phishing simulations may need extra training and later managerial escalation."}, {"title": "Measuring Program Success", "content": "\nThe lecture identifies four broad areas for measuring success:\n• Process improvement\n• Attack resistance\n• Efficiency and effectiveness\n• Internal protections\n\nA program should be reviewed by:\n• Revisiting objectives\n• Recording achievements\n• Identifying weaknesses\n• Modifying and improving the program\n\nThe final aim is not just to deliver training, but to confirm that the target group understands and follows the required security practices.\n", "memory": "The program succeeds when behaviour improves, not merely when training is completed.", "scenario": "A lower phishing click rate after training is stronger evidence than simply recording that 100% of staff watched a video."}]}, {"title": "Section 2 – Part 03: Continuity Strategies", "topics": [{"title": "Contingency Planning", "content": "\nContingency planning is part of security planning and prepares the organization to respond to events that threaten information, assets, and business operations.\n\nIt includes:\n• Incident Response Planning (IRP)\n• Disaster Recovery Planning (DRP)\n• Business Continuity Planning (BCP)\n\nIRP focuses on immediate incident response.\nDRP focuses on restoring systems after a disaster.\nBCP focuses on continuing critical business operations.\n\nIf an incident escalates, the organization may move from IRP into DRP and BCP.\n", "memory": "IRP = incident now. DRP = restore systems. BCP = keep business running.", "scenario": "A ransomware incident begins with IRP. If servers become unusable for days, DRP and BCP become necessary."}, {"title": "Incident Planning", "content": "\nPredefined incident responses help an organization react quickly and effectively.\n\nThis assumes:\n• The organization has an incident-response team.\n• The organization can detect incidents.\n\nThe incident-response team should:\n• Verify the threat\n• Determine the appropriate response\n• Coordinate required actions\n\nIncident plans should be well organized, easy to access, protected as sensitive information, and tested regularly.\n\nTesting approaches listed include:\n• Checklist\n• Structured walk-through\n• Simulation\n• Parallel\n• Full interruption\n", "memory": "A plan that cannot be found or has never been tested is not a useful plan.", "scenario": "During an attack, responders should not waste time searching for procedures or contact details."}, {"title": "Incident Detection and Classification", "content": "\nIncidents can be detected through:\n• Help desk reports\n• Intrusion-detection systems\n• Host-based or network-based monitoring\n• Antivirus software\n• System administrators\n• End users\n\nTraining is important so users and security personnel can identify and classify incidents quickly.\n\nIncident classification means examining a potential incident and deciding whether it is actually an incident.\n", "memory": "Detect first, classify correctly, then respond.", "scenario": "A user reports unusual pop-ups. The help desk checks whether this is a real malware incident or a harmless event."}, {"title": "Incident Reaction", "content": "\nIncident reaction includes actions used to:\n• Stop the incident\n• Reduce or mitigate impact\n• Provide information needed for recovery\n\nImportant immediate actions include:\n• Notify key personnel\n• Assign tasks\n• Document the incident\n\nAn incident may be considered a disaster when:\n• The organization cannot mitigate the impact during the incident, or\n• Damage is so severe that quick recovery is not possible\n", "memory": "Reaction = stop, reduce, record.", "scenario": "If an attack cannot be contained and business operations are heavily disrupted, the incident may need disaster-level response."}, {"title": "Incident Containment", "content": "\nContainment aims to stop the incident and regain control of affected systems.\n\nBefore containment, the organization should identify affected areas.\n\nExamples of containment actions:\n• Disconnect affected external circuits\n• Disable compromised accounts\n• Reconfigure firewall rules\n• Disable a vulnerable service\n• Shut down an affected application or server\n• In extreme cases, stop all computers and network devices\n\nThe key idea is to isolate the source or path of loss.\n", "memory": "Containment = isolate the problem before it spreads.", "scenario": "If attackers are using one compromised account, disabling that account is a direct containment action."}, {"title": "Incident Recovery and Damage Assessment", "content": "\nRecovery starts after the incident has been contained and control has been regained.\n\nRecovery activities include:\n• Identify required human resources\n• Assess damage\n• Repair vulnerabilities\n• Correct weaknesses in safeguards\n• Restore systems, data, and services\n\nDamage assessment uses evidence such as:\n• System logs\n• Intrusion-detection logs\n• Configuration logs\n• Incident-response documentation\n• Detailed system and storage assessment\n\nComputer forensics involves collecting, analyzing, and preserving computer-related evidence.\n\nEvidence must be carefully collected, documented, and maintained if it may be used in legal or disciplinary proceedings.\n", "memory": "Contain first; recover second; preserve evidence throughout.", "scenario": "After ransomware is stopped, responders review logs, fix the exploited weakness, restore from backup, and preserve evidence."}, {"title": "Mission-Critical Systems", "content": "\nA mission-critical system is any system that must continue operating for the business to continue.\n\nIdentifying mission-critical systems requires understanding how the organization works.\n\nFor example, if sales staff accept customer orders and enter them into a database, critical elements may include:\n• Sales staff\n• Telephone\n• Order application\n• Back-end database\n• Website, if online ordering is used\n\nThe importance of a system depends on how the organization uses it.\n", "memory": "Critical = the business cannot function properly without it.", "scenario": "For an online bank, authentication and transaction systems are mission-critical."}, {"title": "Business Impact Analysis (BIA)", "content": "\nBIA identifies the impact of losing business functions.\n\nThe impact may be measured in cost.\n\nDirect costs include:\n• Immediate loss of sales\n• Recovery expenses\n\nIndirect costs include:\n• Loss of customer confidence\n• Reputation impact\n\nA BIA report commonly includes:\n• Direct and indirect costs\n• Maximum acceptable outage\n• Materials/resources required for recovery\n\nBasic BIA steps:\n1. Define the scope.\n2. Identify measurable objectives.\n3. Identify mission-critical functions and processes.\n4. Map business functions and processes to IT systems.\n", "memory": "BIA = what breaks, how much it hurts, and how long we can tolerate it.", "scenario": "If email is unavailable for a day, direct cost may be lost productivity; indirect cost may be customer frustration."}, {"title": "Business Continuity Planning (BCP)", "content": "\nBCP is an overall plan for ensuring critical organizational operations continue during or after a disaster or emergency.\n\nBCP identifies:\n• Critical systems\n• Acceptable downtime\n• Recovery requirements\n\nBCP uses information from BIA and may include DRPs for specific IT systems.\n\nPre-incident BCP steps include:\n• Analysis\n• Identify scope\n• Identify key business areas\n• Identify critical functions\n• Identify dependencies\n• Determine acceptable downtime\n• Design a continuity solution\n• Implement it\n• Test it\n• Maintain and improve it\n\nPost-incident phases include:\n• Notification/activation\n• Recovery\n• Reconstitution\n", "memory": "BCP keeps the organization alive while recovery happens.", "scenario": "If the main office is unavailable, staff may move to an alternate site so critical services continue."}, {"title": "Disaster Recovery Planning (DRP)", "content": "\nDRP is a key component of BCP and contains the detailed steps needed to restore one or more systems after a disaster.\n\nExamples include:\n• Restoring servers\n• Recovering data from backups\n• Rebuilding damaged infrastructure\n\nDRP has a narrower scope than BCP.\n\nBCP = continue the business.\nDRP = recover the systems.\n", "memory": "BCP keeps working. DRP rebuilds technology.", "scenario": "After a server-room fire, the DRP explains how to rebuild servers and restore data from backups."}, {"title": "Business Liability and Asset Replacement Insurance", "content": "\nOrganizations can transfer or share some risk through insurance.\n\nBusiness liability insurance protects against lawsuits and legal costs.\n\nThe lecture lists:\n• General liability\n• Professional liability\n• Product liability\n\nAsset replacement insurance helps replace assets damaged in disasters, such as:\n• Fire insurance\n• Flood insurance\n• Life insurance for key personnel\n\nInsurance decisions depend on factors such as asset value and organizational risk.\n", "memory": "Insurance does not prevent incidents; it helps transfer financial impact.", "scenario": "A company may buy flood insurance even after implementing technical and physical safeguards."}, {"title": "Law Enforcement Involvement", "content": "\nLaw enforcement may become necessary when an incident moves beyond policy violation and becomes a crime.\n\nQuestions include:\n• When should law enforcement be contacted?\n• Which agency should be involved?\n• What happens once authorities take over?\n\nAdvantages:\n• Better evidence-processing capability\n• Experience with digital evidence\n• Ability to manage warrants and subpoenas\n• Skill in interviews and witness statements\n\nDisadvantages:\n• Organization may lose control over the case\n• Investigation may take weeks or months\n• Important equipment may be seized as evidence\n\nThe lecture states that when a criminal act is detected, appropriate law enforcement may need to be involved.\n", "memory": "Benefit = legal expertise. Drawback = less organizational control.", "scenario": "Police may seize a compromised server as evidence, leaving the organization without access to that equipment."}]}];
+const FLASH_RICH = [{"cat": "Laws & Ethics", "term": "Law", "def": "A rule that mandates or prohibits behaviour and carries the authority of a governing body.", "hook": "LAW = Legal Authority With consequences.", "example": "Unauthorized access can become a legal offence, not just a policy violation."}, {"cat": "Laws & Ethics", "term": "Ethics", "def": "Standards of socially acceptable behaviour that do not carry the same governing authority as law.", "hook": "Ethics = what you should do, even when law may not force it.", "example": "Reading a colleague’s private files may be unethical even before legal consequences are considered."}, {"cat": "Laws & Ethics", "term": "Due Care", "def": "Making sure employees know acceptable and unacceptable behaviour and the consequences of violations.", "hook": "Care = establish the proper protection and expectations.", "example": "Publishing and explaining an acceptable-use policy is due care."}, {"cat": "Laws & Ethics", "term": "Due Diligence", "def": "Making a valid and continuing effort to maintain protection after controls are established.", "hook": "Diligence = keep checking and maintaining protection.", "example": "Regularly reviewing access controls and updating policies is due diligence."}, {"cat": "Laws & Ethics", "term": "Deterrence", "def": "Discouraging illegal or unethical behaviour through penalties, detection, and enforcement.", "hook": "Deterrence = penalty + caught + enforced.", "example": "A rule is weak if users believe nobody monitors violations."}, {"cat": "Policy", "term": "Policy", "def": "A high-level statement that provides guidelines and instructions for decision-making.", "hook": "Policy = WHAT / overall rule.", "example": "Company information must only be accessed for authorized business purposes."}, {"cat": "Policy", "term": "Standard", "def": "A detailed mandatory statement describing what must be done to comply with policy.", "hook": "Standard = MUST.", "example": "Passwords must contain at least 12 characters."}, {"cat": "Policy", "term": "Procedure", "def": "Step-by-step instructions explaining how employees carry out a task.", "hook": "Procedure = HOW.", "example": "Steps for registering, checking, and escorting a visitor."}, {"cat": "Policy", "term": "Guideline", "def": "A non-mandatory recommendation used as a reference when following policy.", "hook": "Guideline = SHOULD.", "example": "Tips on how to create a memorable but secure password."}, {"cat": "Policy", "term": "EISP", "def": "Enterprise Information Security Program Policy: executive-level, organization-wide security direction.", "hook": "E = Enterprise.", "example": "Defines organization-wide security responsibilities and legal compliance requirements."}, {"cat": "Policy", "term": "ISSP", "def": "Issue-Specific Security Policy: addresses a specific technology, resource, or security issue.", "hook": "I = Issue.", "example": "A policy covering email, Internet use, or personal devices."}, {"cat": "Policy", "term": "SysSP", "def": "System-Specific Policy: focuses on system configuration, operation, and technical access requirements.", "hook": "Sys = System.", "example": "Firewall configuration rules or an access-control list."}, {"cat": "Models", "term": "Bell-LaPadula", "def": "A security architecture model mainly associated with protecting confidentiality.", "hook": "Bell = keep secrets confidential.", "example": "Useful when the main concern is preventing disclosure of classified information."}, {"cat": "Models", "term": "Biba", "def": "A security model mainly associated with protecting information integrity.", "hook": "Biba = integrity.", "example": "Used when preventing unauthorized modification is the key concern."}, {"cat": "Models", "term": "Brewer-Nash", "def": "Also called the Chinese Wall model; prevents conflicts of interest through access control.", "hook": "Wall = separate conflicting interests.", "example": "A consultant should not access confidential data from competing clients."}, {"cat": "SETA", "term": "SETA", "def": "Security Education, Training, and Awareness; designed to reduce accidental security breaches and improve secure behaviour.", "hook": "SETA = teach people to KNOW, DO, and REPORT securely.", "example": "Awareness campaigns, training sessions, quizzes, and simulated phishing."}, {"cat": "SETA", "term": "Security Awareness", "def": "Educates users about their responsibility to protect confidentiality, integrity, and availability.", "hook": "Awareness = I KNOW.", "example": "Knowing that phishing links can steal credentials."}, {"cat": "SETA", "term": "Security Behaviour", "def": "The actual actions users take when handling information and systems.", "hook": "Behaviour = I DO.", "example": "Reporting a suspicious phishing message instead of clicking it."}, {"cat": "SETA", "term": "Target Group Analysis", "def": "Identifying who the awareness program is for and assessing their awareness, behaviour, ICT use, and concerns.", "hook": "Different users need different security messages.", "example": "Finance staff may need stronger anti-fraud content than general users."}, {"cat": "SETA", "term": "Awareness Program Cycle", "def": "Plan, Strategize, Execute, then Measure and Adjust for continuous improvement.", "hook": "P-S-E-MA.", "example": "Measure phishing risk, train users, test them, then improve the program."}, {"cat": "Continuity", "term": "IRP", "def": "Incident Response Planning: identifies, classifies, responds to, contains, and recovers from incidents.", "hook": "IRP = incident NOW.", "example": "Disable a compromised account and coordinate the response team."}, {"cat": "Continuity", "term": "DRP", "def": "Disaster Recovery Planning: prepares for and restores systems after a major disaster.", "hook": "DRP = restore technology.", "example": "Rebuild servers and restore data from backups after a fire."}, {"cat": "Continuity", "term": "BCP", "def": "Business Continuity Planning: ensures critical business functions continue during major disruption.", "hook": "BCP = keep business running.", "example": "Move staff to an alternate site while the main office is unavailable."}, {"cat": "Continuity", "term": "BIA", "def": "Business Impact Analysis: identifies the impact of losing business functions, including cost and acceptable outage.", "hook": "BIA = what breaks, how much it hurts, how long we can tolerate it.", "example": "Estimate lost sales and customer-confidence damage if email or payment systems fail."}, {"cat": "Continuity", "term": "Incident Containment", "def": "Stopping an incident and regaining control of affected systems by isolating accounts, traffic, services, or devices.", "hook": "Containment = isolate before it spreads.", "example": "Disable a compromised account or block malicious traffic at the firewall."}, {"cat": "Continuity", "term": "Incident Recovery", "def": "Begins after containment and includes damage assessment, fixing vulnerabilities, and restoring data and services.", "hook": "Contain → recover → restore.", "example": "Patch the exploited weakness and restore clean data from backup."}, {"cat": "Continuity", "term": "Mission-Critical System", "def": "A system that must continue running for the organization to continue its essential operations.", "hook": "If it stops, the business seriously suffers.", "example": "An online bank’s authentication and transaction systems are mission-critical."}, {"cat": "Continuity", "term": "Computer Forensics", "def": "The process of collecting, analyzing, and preserving computer-related evidence.", "hook": "Collect, analyze, preserve.", "example": "Review logs and preserve evidence after a cyber incident."}];
+const MOCK = {"mcq": [{"q": "Which statement BEST differentiates law from ethics?", "o": ["Law is optional while ethics is mandatory", "Law is enforced by a governing authority while ethics is socially accepted behaviour", "Ethics always carries criminal penalties", "Law only applies to organizations"], "a": 1}, {"q": "Which document provides step-by-step instructions for employees?", "o": ["Policy", "Standard", "Procedure", "Guideline"], "a": 2}, {"q": "Which policy type gives enterprise-wide strategic security direction?", "o": ["ISSP", "SysSP", "EISP", "DRP"], "a": 2}, {"q": "A rule on proper employee use of company email is most likely a:", "o": ["EISP", "ISSP", "SysSP", "BIA"], "a": 1}, {"q": "Which security model is mainly associated with confidentiality?", "o": ["Biba", "Bell-LaPadula", "COBIT", "ITIL"], "a": 1}, {"q": "Which BEST represents security behaviour rather than awareness?", "o": ["Knowing phishing is dangerous", "Reading a poster", "Reporting a suspicious phishing email", "Attending a briefing"], "a": 2}, {"q": "Which plan focuses on immediate incident response?", "o": ["BCP", "DRP", "IRP", "BIA"], "a": 2}, {"q": "Which is an indirect cost in a Business Impact Analysis?", "o": ["Immediate lost sales", "Server replacement cost", "Loss of customer confidence", "Recovery overtime"], "a": 2}], "scenario": [{"q": "A staff member receives an urgent email claiming to be from the CEO and transfers money. The employee knows phishing exists but still follows the instruction. Which concept BEST explains the issue?", "o": ["The employee completely lacks awareness", "The employee lacks secure behaviour despite awareness", "The company needs a DRP", "The company needs product liability insurance"], "a": 1}, {"q": "An attacker compromises one employee account. The security team disables the account and blocks the related traffic. What stage is this?", "o": ["Incident containment", "Business impact analysis", "Reconstitution", "Security awareness"], "a": 0}, {"q": "A fire destroys the server room. The company restores systems from backups at an alternate site. Which plan is being used most directly?", "o": ["SETA", "DRP", "ISSP", "EISP"], "a": 1}, {"q": "A company continues operations from an alternate office while the main office is unavailable after a flood. Which plan is this MOST associated with?", "o": ["BCP", "SysSP", "Incident classification", "Due care"], "a": 0}, {"q": "An organization publishes a policy, then reviews it yearly and checks whether controls remain effective. The yearly review is BEST associated with:", "o": ["Due care only", "Due diligence", "Computer-assisted crime", "Civil law"], "a": 1}, {"q": "A company gives the same annual security video to every employee, but phishing incidents remain high in finance. Which SETA weakness is MOST obvious?", "o": ["Too much law enforcement", "One-size-fits-all training", "Too many SysSPs", "Too much insurance"], "a": 1}], "terms": [{"prompt": "High-level statement that guides decision-making and expected behaviour.", "answer": "Policy"}, {"prompt": "Mandatory detailed requirement that must be followed to comply with policy.", "answer": "Standard"}, {"prompt": "Step-by-step instructions for carrying out a task.", "answer": "Procedure"}, {"prompt": "Non-mandatory recommendation or advice.", "answer": "Guideline"}, {"prompt": "Executive-level, enterprise-wide information security policy.", "answer": "EISP"}, {"prompt": "Policy focused on a specific issue or technology such as email use.", "answer": "ISSP"}, {"prompt": "Policy focused on a specific system or technical configuration.", "answer": "SysSP"}, {"prompt": "Immediate planning for identification, response, containment, and recovery from incidents.", "answer": "IRP"}, {"prompt": "Plan focused on restoring systems after a disaster.", "answer": "DRP"}, {"prompt": "Plan focused on keeping critical business operations running.", "answer": "BCP"}, {"prompt": "Analysis used to identify the impact of losing business functions.", "answer": "BIA"}, {"prompt": "Ongoing effort to maintain protection after it has been established.", "answer": "Due diligence"}], "tf": [{"q": "Ethics carries the same authority as law.", "a": false}, {"q": "A guideline is normally non-mandatory.", "a": true}, {"q": "EISP is more specific than ISSP.", "a": false}, {"q": "Bell-LaPadula is associated with confidentiality.", "a": true}, {"q": "Awareness automatically guarantees secure behaviour.", "a": false}, {"q": "SETA aims to reduce accidental security breaches.", "a": true}, {"q": "BCP has a wider scope than DRP.", "a": true}, {"q": "Containment can include disabling compromised accounts.", "a": true}, {"q": "BIA considers only direct costs.", "a": false}, {"q": "Due diligence involves maintaining protection efforts over time.", "a": true}]};
+const MCQ = [{"q": "Which best describes ethics?", "o": ["Rules enforced by a government", "Socially accepted behaviour", "A technical security control", "A disaster-recovery method"], "a": 1}, {"q": "Which document tells employees HOW to perform a task?", "o": ["Policy", "Standard", "Procedure", "Guideline"], "a": 2}, {"q": "Which policy is organization-wide and executive-level?", "o": ["ISSP", "EISP", "SysSP", "DRP"], "a": 1}, {"q": "A policy about employee email use is usually:", "o": ["EISP", "ISSP", "SysSP", "BCP"], "a": 1}, {"q": "Which model is most associated with confidentiality?", "o": ["Biba", "Bell-LaPadula", "COBIT", "ITIL"], "a": 1}, {"q": "Awareness means:", "o": ["I know", "I do", "I punish", "I recover"], "a": 0}, {"q": "Which measures actual behaviour best?", "o": ["Poster count", "Quiz only", "Simulated phishing", "Policy length"], "a": 2}, {"q": "Which plan focuses on immediate incident response?", "o": ["BCP", "DRP", "IRP", "BIA"], "a": 2}, {"q": "Which plan has the broadest business-continuity scope?", "o": ["DRP", "BCP", "SysSP", "SETA"], "a": 1}, {"q": "Which is an indirect BIA cost?", "o": ["Lost sales", "Recovery overtime", "Loss of customer confidence", "Replacement server"], "a": 2}, {"q": "Disabling a compromised account is an example of:", "o": ["Containment", "Reconstitution", "Awareness", "Due care"], "a": 0}, {"q": "Due diligence means:", "o": ["Set protection once", "Maintain protection continuously", "Write a guideline only", "Buy insurance only"], "a": 1}];
+
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+
+$$('.navbtn').forEach(btn=>{
+  btn.onclick=()=>{
+    $$('.navbtn').forEach(x=>x.classList.remove('active'));
+    btn.classList.add('active');
+    $$('.section').forEach(x=>x.classList.remove('active'));
+    $('#' + btn.dataset.s).classList.add('active');
+    window.scrollTo({top:0, behavior:'smooth'});
+  };
+});
+
+function esc(s){
+  return (s || '').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+let currentSectionIndex = 0;
+
+function renderSectionTabs(){
+  $('#sectionTabs').innerHTML = SECTIONS.map((s,i)=>
+    `<button class="tab ${i===currentSectionIndex?'active':''}" onclick="setStudySection(${i})">${esc(s.title)}</button>`
+  ).join('');
+}
+
+window.setStudySection = function(i){
+  currentSectionIndex = i;
+  renderSectionTabs();
+  renderNotes($('#search').value || '');
+}
+
+function renderNotes(query=''){
+  const topics = SECTIONS[currentSectionIndex].topics.filter(t =>
+    (t.title + ' ' + t.content + ' ' + t.memory + ' ' + t.scenario).toLowerCase().includes(query.toLowerCase())
+  );
+  $('#notesbox').innerHTML = topics.map(t => `
+    <div class="card block topic-card">
+      <h3>${esc(t.title)}</h3>
+      <div class="content">${esc(t.content)}</div>
+      <div class="extras">
+        <div class="extra">
+          <b>Memory Hook</b><br><br>${esc(t.memory)}
+        </div>
+        <div class="extra">
+          <b>Real-world Scenario</b><br><br>${esc(t.scenario)}
+        </div>
+      </div>
+    </div>
+  `).join('') || `<div class="card block">No matching topic found.</div>`;
+}
+
+$('#search').addEventListener('input', e => renderNotes(e.target.value));
+
+function buildSummary(){
+  const items = [
+    {
+      title: 'Laws & Ethics',
+      text: 'Law has governing authority; ethics describes socially accepted behaviour. Know cybercrime, types of law, deterrence, due care, due diligence, investigations, and code of ethics.'
+    },
+    {
+      title: 'Policy, Frameworks & Models',
+      text: 'Policy = WHAT, Standard = MUST, Procedure = HOW, Guideline = SHOULD. EISP = enterprise, ISSP = issue, SysSP = system. Bell-LaPadula = confidentiality, Biba = integrity.'
+    },
+    {
+      title: 'SETA',
+      text: 'SETA reduces accidental breaches. Awareness = I know, Behaviour = I do. Lifecycle: Plan → Strategize → Execute → Measure & Adjust.'
+    },
+    {
+      title: 'Continuity Strategies',
+      text: 'IRP = immediate response. DRP = restore systems after disaster. BCP = keep business running. BIA measures impact, outage tolerance, and recovery needs.'
+    }
+  ];
+  $('#summaryBox').innerHTML = items.map(x=>`
+    <div class="summary block">
+      <h3>${esc(x.title)}</h3>
+      <p>${esc(x.text)}</p>
+    </div>
+  `).join('');
+}
+
+
+
+function buildQuiz(){
+  $('#quizbox').innerHTML = MCQ.map((q,i)=>`
+    <div class="quiz-item block">
+      <b>${i+1}. ${esc(q.q)}</b>
+      ${q.o.map((o,j)=>`<button class="opt" onclick="answerMCQ(this,${i},${j})">${String.fromCharCode(65+j)}. ${esc(o)}</button>`).join('')}
+    </div>
+  `).join('');
+}
+
+window.answerMCQ = function(btn, i, j){
+  const parent = btn.parentElement;
+  parent.querySelectorAll('.opt').forEach((el,k)=>{
+    el.disabled = true;
+    if(k === MCQ[i].a) el.classList.add('good');
+  });
+  if(j !== MCQ[i].a) btn.classList.add('bad');
+}
+
+renderSectionTabs();
+renderNotes();
+buildSummary();
+
+
+let flashCategory = 'All';
+let flashKnown = {};
+let flashReview = {};
+let currentFlashIndex = 0;
+let reviewOnlyMode = false;
+let flashOrder = [];
+
+function getFlashSet(){
+  let set = FLASH_RICH.map((c,i)=>({...c,_id:i}));
+  if(flashCategory !== 'All') set = set.filter(c=>c.cat===flashCategory);
+  if(reviewOnlyMode) set = set.filter(c=>flashReview[c._id]);
+  if(flashOrder.length){
+    const pos = Object.fromEntries(flashOrder.map((id,idx)=>[id,idx]));
+    set.sort((a,b)=>(pos[a._id]??999)-(pos[b._id]??999));
+  }
+  return set;
+}
+
+function renderFlashFilters(){
+  const cats = ['All', ...new Set(FLASH_RICH.map(c=>c.cat))];
+  $('#flashFilters').innerHTML = cats.map(cat=>
+    `<button class="tab ${cat===flashCategory?'active':''}" onclick="setFlashCategory('${cat.replace(/'/g,"\\'")}')">${esc(cat)}</button>`
+  ).join('');
+}
+
+window.setFlashCategory = function(cat){
+  flashCategory = cat;
+  reviewOnlyMode = false;
+  currentFlashIndex = 0;
+  renderReactiveFlashcards();
+}
+
+function renderReactiveFlashcards(){
+  renderFlashFilters();
+  const set = getFlashSet();
+  const total = set.length;
+  const knownCount = set.filter(c=>flashKnown[c._id]).length;
+  const reviewCount = set.filter(c=>flashReview[c._id]).length;
+  const rated = knownCount + reviewCount;
+
+  $('#fcTotal').textContent = total;
+  $('#fcKnown').textContent = knownCount;
+  $('#fcReview').textContent = reviewCount;
+  $('#fcProgress').textContent = total ? Math.round((rated/total)*100)+'%' : '0%';
+
+  if(!set.length){
+    $('#flashStage').innerHTML = `<div class="card block"><h3>No cards here</h3><p>${reviewOnlyMode ? 'You have no cards marked for review in this set.' : 'No flashcards match this category.'}</p></div>`;
+    $('#flashDeck').innerHTML='';
+    return;
+  }
+
+  if(currentFlashIndex >= set.length) currentFlashIndex = 0;
+  const c = set[currentFlashIndex];
+
+  $('#flashStage').innerHTML = `
+    <div class="flash-main block" id="mainFlashCard">
+      <div class="category">${esc(c.cat)} • Card ${currentFlashIndex+1} of ${set.length}</div>
+      <div class="term-title">${esc(c.term)}</div>
+      <div class="front-hint">Think of the definition first, then reveal the answer.</div>
+
+      <div class="flash-answer-panel">
+        <p><b>Definition</b><br>${esc(c.def)}</p>
+        <p><b>Memory Hook</b><br>${esc(c.hook)}</p>
+        <p><b>Real-World Example</b><br>${esc(c.example)}</p>
+      </div>
+
+      <div class="flash-actions">
+        <button class="navbtn" onclick="revealMainFlash()">Reveal Answer</button>
+        <button class="navbtn know-btn" onclick="markFlash(${c._id},'known')">Know It</button>
+        <button class="navbtn review-btn" onclick="markFlash(${c._id},'review')">Review Again</button>
+        <button class="navbtn" onclick="prevFlash()">Previous</button>
+        <button class="navbtn" onclick="nextFlash()">Next</button>
+      </div>
+    </div>
+  `;
+
+  $('#flashDeck').innerHTML = set.map((x,idx)=>{
+    const status = flashKnown[x._id] ? '<span class="status known">✓</span>' :
+                   flashReview[x._id] ? '<span class="status review">!</span>' : '';
+    return `<div class="flash-mini block" onclick="openFlash(${idx})">
+      ${status}
+      <small>${esc(x.cat)}</small>
+      <b>${esc(x.term)}</b>
+      <p style="font-size:13px;margin-top:8px;">${esc(x.hook)}</p>
+    </div>`;
+  }).join('');
+}
+
+window.revealMainFlash = function(){
+  $('#mainFlashCard')?.classList.add('revealed');
+}
+
+window.markFlash = function(id,status){
+  if(status==='known'){
+    flashKnown[id]=true;
+    delete flashReview[id];
+  }else{
+    flashReview[id]=true;
+    delete flashKnown[id];
+  }
+  nextFlash();
+}
+
+window.nextFlash = function(){
+  const set = getFlashSet();
+  if(set.length) currentFlashIndex = (currentFlashIndex + 1) % set.length;
+  renderReactiveFlashcards();
+}
+
+window.prevFlash = function(){
+  const set = getFlashSet();
+  if(set.length) currentFlashIndex = (currentFlashIndex - 1 + set.length) % set.length;
+  renderReactiveFlashcards();
+}
+
+window.openFlash = function(idx){
+  currentFlashIndex = idx;
+  renderReactiveFlashcards();
+  $('#flashStage')?.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+$('#shuffleFlashBtn').onclick = function(){
+  const ids = FLASH_RICH.map((_,i)=>i);
+  for(let i=ids.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [ids[i],ids[j]]=[ids[j],ids[i]];
+  }
+  flashOrder = ids;
+  currentFlashIndex = 0;
+  renderReactiveFlashcards();
+}
+
+$('#reviewOnlyBtn').onclick = function(){
+  reviewOnlyMode = !reviewOnlyMode;
+  currentFlashIndex = 0;
+  $('#reviewOnlyBtn').textContent = reviewOnlyMode ? 'Show All Cards' : 'Review Missed';
+  renderReactiveFlashcards();
+}
+
+$('#resetFlashBtn').onclick = function(){
+  flashKnown = {};
+  flashReview = {};
+  reviewOnlyMode = false;
+  flashOrder = [];
+  currentFlashIndex = 0;
+  $('#reviewOnlyBtn').textContent = 'Review Missed';
+  renderReactiveFlashcards();
+}
+
+renderReactiveFlashcards();
+
+buildQuiz();
+
+function buildMidtermMock(){
+  let out = '';
+
+  out += '<div class="card block"><h3>Part A — MCQ</h3>';
+  MOCK.mcq.forEach((q,i)=>{
+    out += `<div class="quiz-item block" style="margin-bottom:12px;"><b>A${i+1}. ${esc(q.q)}</b>` +
+      q.o.map((o,j)=>`<label class="opt"><input type="radio" name="mm${i}" value="${j}" onchange="updateMockProgress()"> ${String.fromCharCode(65+j)}. ${esc(o)}</label>`).join('') +
+      `</div>`;
+  });
+  out += '</div>';
+
+  out += '<div class="card block"><h3>Part B — Scenario Questions</h3>';
+  MOCK.scenario.forEach((q,i)=>{
+    out += `<div class="quiz-item block" style="margin-bottom:12px;"><b>B${i+1}. ${esc(q.q)}</b>` +
+      q.o.map((o,j)=>`<label class="opt"><input type="radio" name="ms${i}" value="${j}" onchange="updateMockProgress()"> ${String.fromCharCode(65+j)}. ${esc(o)}</label>`).join('') +
+      `</div>`;
+  });
+  out += '</div>';
+
+  out += '<div class="card block"><h3>Part C — Pick-A-Term</h3><p>Type the most suitable term from the lecture.</p>';
+  MOCK.terms.forEach((q,i)=>{
+    out += `<div class="quiz-item block" style="margin-bottom:12px;"><b>C${i+1}. ${esc(q.prompt)}</b><input class="search" style="margin-bottom:0;" id="term${i}" oninput="updateMockProgress()" placeholder="Type your answer..."></div>`;
+  });
+  out += '</div>';
+
+  out += '<div class="card block"><h3>Part D — True / False</h3>';
+  MOCK.tf.forEach((q,i)=>{
+    out += `<div class="quiz-item block" style="margin-bottom:12px;"><b>D${i+1}. ${esc(q.q)}</b>
+      <label class="opt"><input type="radio" name="mt${i}" value="true" onchange="updateMockProgress()"> True</label>
+      <label class="opt"><input type="radio" name="mt${i}" value="false" onchange="updateMockProgress()"> False</label>
+    </div>`;
+  });
+  out += '</div>';
+
+  $('#mockContainer').innerHTML = out;
+  $('#mockResult').style.display='none';
+  updateMockProgress();
+}
+
+window.updateMockProgress = function(){
+  let done = 0;
+  MOCK.mcq.forEach((_,i)=>{ if(document.querySelector(`input[name="mm${i}"]:checked`)) done++; });
+  MOCK.scenario.forEach((_,i)=>{ if(document.querySelector(`input[name="ms${i}"]:checked`)) done++; });
+  MOCK.terms.forEach((_,i)=>{ if((document.querySelector(`#term${i}`)?.value || '').trim()) done++; });
+  MOCK.tf.forEach((_,i)=>{ if(document.querySelector(`input[name="mt${i}"]:checked`)) done++; });
+  $('#mockProgress').textContent = `Progress: ${done} / 36`;
+}
+
+function normalizeTerm(s){
+  return (s || '').trim().toLowerCase().replace(/[^a-z0-9]/g,'');
+}
+
+function submitMidtermMock(){
+  let score = 0;
+  const breakdown = {mcq:[0,0], scenario:[0,0], terms:[0,0], tf:[0,0]};
+
+  MOCK.mcq.forEach((q,i)=>{
+    breakdown.mcq[1]++;
+    const a = document.querySelector(`input[name="mm${i}"]:checked`);
+    if(a && Number(a.value) === q.a){ score++; breakdown.mcq[0]++; }
+  });
+
+  MOCK.scenario.forEach((q,i)=>{
+    breakdown.scenario[1]++;
+    const a = document.querySelector(`input[name="ms${i}"]:checked`);
+    if(a && Number(a.value) === q.a){ score++; breakdown.scenario[0]++; }
+  });
+
+  MOCK.terms.forEach((q,i)=>{
+    breakdown.terms[1]++;
+    const a = document.querySelector(`#term${i}`)?.value || '';
+    if(normalizeTerm(a) === normalizeTerm(q.answer)){ score++; breakdown.terms[0]++; }
+  });
+
+  MOCK.tf.forEach((q,i)=>{
+    breakdown.tf[1]++;
+    const a = document.querySelector(`input[name="mt${i}"]:checked`);
+    if(a && (a.value === 'true') === q.a){ score++; breakdown.tf[0]++; }
+  });
+
+  const total = 36;
+  const pct = Math.round(score / total * 100);
+  const msg = pct >= 80 ? 'Strong. Your core concepts are in good shape.' :
+              pct >= 65 ? 'Decent. Review the sections where your score is lower.' :
+              'Revise the notes again, especially the distinction-based topics, then retry.';
+
+  $('#mockResult').style.display='block';
+  $('#mockResult').innerHTML = `
+    <h2>Mock Result: ${score}/${total} (${pct}%)</h2>
+    <p>${msg}</p>
+    <p>
+      <b>Part A — MCQ:</b> ${breakdown.mcq[0]}/${breakdown.mcq[1]}<br>
+      <b>Part B — Scenario:</b> ${breakdown.scenario[0]}/${breakdown.scenario[1]}<br>
+      <b>Part C — Pick-A-Term:</b> ${breakdown.terms[0]}/${breakdown.terms[1]}<br>
+      <b>Part D — True/False:</b> ${breakdown.tf[0]}/${breakdown.tf[1]}
+    </p>
+  `;
+  $('#mockResult').scrollIntoView({behavior:'smooth'});
+}
+
+$('#startMockBtn').onclick = buildMidtermMock;
+$('#submitMockBtn').onclick = submitMidtermMock;
+buildMidtermMock();
+
+</script>
+</body>
+</html>
